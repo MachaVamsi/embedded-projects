@@ -1,0 +1,5 @@
+../Src/main_RTOS_exp1.c:22:6:SenderTask	24	static
+../Src/main_RTOS_exp1.c:35:6:ReceiverTask	24	static
+../Src/main_RTOS_exp1.c:55:13:defaultTask	16	static
+../Src/main_RTOS_exp1.c:63:6:app_main	24	static
+../Src/main_RTOS_exp1.c:77:5:main	8	static

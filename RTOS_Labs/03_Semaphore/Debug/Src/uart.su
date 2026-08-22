@@ -1,0 +1,5 @@
+../Src/uart.c:11:6:uart_enable_clock	8	static
+../Src/uart.c:16:6:gpio_uart_config	8	static
+../Src/uart.c:33:6:uart_send_char	16	static
+../Src/uart.c:40:5:_write	32	static
+../Src/uart.c:50:6:usart2_init	8	static

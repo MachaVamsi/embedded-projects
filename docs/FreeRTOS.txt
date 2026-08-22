@@ -1,0 +1,105 @@
+Q1. xTaskCreate(MyTask, ...); Will MyTask() start executing?
+Ans: No, because xTaskCreate only creates/prepares the task; the scheduler hasn't been started.
+xTaskCreate() does this "Create this task and put it into the RTOS's task management system."
+
+Q2. difference now between RUNNING, READY, and BLOCKED?
+Ans : Running → currently executing on the CPU. "I currently have the CPU."
+        Ready → able to execute, but another task currently has the CPU. "I am eligible to run."
+        Blocked → deliberately waiting for something, such as a delay, queue, semaphore, notification, etc. It is not eligible to run until that wait 
+        condition is satisfied.
+
+Q3. What is preemption and timeslicing?
+Ans. Preemption = a currently running task is forced off the CPU because another task should run.
+     Time slicing = equal-priority READY tasks share CPU time.
+
+Q4. TaskA → READY, TaskB → READY. Both tasks ready and have same priority. If TaskA gets the CPU, what makes TaskB get a chance?
+Ans. With both tasks continuously READY at the same priority,  the periodic FreeRTOS tick causes time slicing 
+    so TaskB can replace TaskA rather than either task blocking voluntarily.
+        CPU
+        │
+        ├── TaskA running
+        │
+        │   FreeRTOS tick
+        │
+        ├── TaskB running
+        │
+        │   FreeRTOS tick
+        │
+        ├── TaskA running
+        │
+        │   FreeRTOS tick
+        │
+        └── TaskB running
+
+Q5. If we changed TaskA's priority from 1 to 2, while TaskB stays at 1, and neither task blocks, what do you expect to happen?
+Ans: With TaskA at priority 2 and TaskB at priority 1, 
+     TaskA would keep the CPU while TaskB remains READY but never runs unless TaskA blocks or is suspended.
+     FreeRTOS runs the highest-priority task that is READY.
+    Time slicing only matters when there are multiple READY tasks at the same priority.
+
+    | Situation                       | Result                             |
+    | ------------------------------- | ---------------------------------- |
+    | Same priority + both READY      | **Time slicing**                   |
+    | Different priority + both READY | **Highest priority runs**          |
+    | Higher-priority task blocks     | **Lower-priority READY task runs** |
+
+Q6. Basic Queue operation 
+                Producer Task
+                │
+                │ xQueueSend()
+                ↓
+                Queue
+                │
+                │ xQueueReceive()
+                ↓
+                Consumer Task
+                │
+                ↓
+                receivedValue
+
+                      FreeRTOS Queue
+              ┌─────────────────┐
+              │                 │
+Producer ────>│     Queue       │────> Consumer
+ TaskA        │                 │      TaskB
+              └─────────────────┘
+
+
+Q7.  Think of the semaphore as a doorbell.
+
+        Task A                         Task B
+
+                                waiting...
+                                │
+                                │
+                                BLOCKED
+                                │
+                                │
+        xSemaphoreGive() ───────> 🔔
+                                │
+                                ↓
+                                WAKE UP
+                                │
+                                ↓
+                        eventCount++
+
+Q8.  What does semaphore carry?
+Ans a semaphore carries no application data. It carries/signals a synchronization event/token
+    xSemaphoreTake() with a nonzero timeout can block when the semaphore isn't available.
+    xSemaphoreGive() causes the waiting task to become eligible to wake/run. The semaphore itself doesn't spontaneously wake the task.
+
+Q9. Is it one semaphore per task?
+
+        No. A semaphore is an RTOS object, not something belonging to one task.
+        The same semaphore can be used by multiple tasks.
+        For example:
+
+                      ┌───────────┐
+        Task A ──────>│           │
+        Task B ──────>│ Semaphore │──────> Task C
+        Task D ──────>│           │
+                      └───────────┘
+
+Q10. Difference between Mutex and Semaphore?
+Ans     We used a semaphore to say: "An event happened."
+        We use a mutex to say: "Only one task may access this shared resource at a time."
