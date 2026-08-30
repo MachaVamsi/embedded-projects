@@ -103,3 +103,56 @@ Q9. Is it one semaphore per task?
 Q10. Difference between Mutex and Semaphore?
 Ans     We used a semaphore to say: "An event happened."
         We use a mutex to say: "Only one task may access this shared resource at a time."
+
+Q11.  xTimerCreate(name, period, auto-reload, timer ID, callback)
+        myTimer = xTimerCreate("MyTimer", pdMS_TO_TICKS(1000), pdTRUE, NULL, TimerCallback);
+
+Q12. SemaphoreHandle_t mySemaphore;
+        QueueHandle_t myQueue;
+        TimerHandle_t myTimer;
+
+Q13. Why did we use pdTRUE in xTimerCreate()?
+Ans Auto-reload the timer after it expires.  pdFALSE, it would be a one-shot timer:
+
+           Start timer                                          Start
+                ↓                                                 ↓
+                1 sec                                           1 sec
+                ↓                                                 ↓
+                Callback                                        Callback
+                ↓                                                 ↓
+                restart automatically                           Stop
+                ↓
+                1 sec
+                ↓
+                Callback
+                ↓
+                restart
+                ↓
+                ...
+
+Q14. Where does the timer callback actually execute?
+Ans The callback executes in the context of the FreeRTOS Timer Service Task, not an ISR and not your main() loop.
+                 FreeRTOS
+                    │
+          Timer Service Task
+                    │
+             timer expires
+                    │
+                    ↓
+             TimerCallback()
+
+
+Q15. What does xTimer represent in void TimerCallback(TimerHandle_t xTimer)?
+Ans xTimer is the timer handle passed by FreeRTOS to the callback, identifying the timer that expired. xTimer argument tells us which timer caused the callback.
+
+
+Q16. Difference between Semaphore and EventGroup?
+Ans A semaphore is essentially:  Event happened
+                                        ↓
+                                        wake
+    An event group can represent multiple independent conditions simultaneously:
+        bit 0 → condition A
+        bit 1 → condition B
+        bit 2 → condition C
+
+        And a task can wait for: A AND B  (or)  A OR B
