@@ -1,0 +1,4 @@
+../Src/07_Event_Groups.c:37:6:TaskA	1
+../Src/07_Event_Groups.c:47:6:TaskB	1
+../Src/07_Event_Groups.c:57:6:MyTask	2
+../Src/07_Event_Groups.c:79:5:main	2
